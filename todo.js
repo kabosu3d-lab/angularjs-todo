@@ -17,7 +17,7 @@ angular.module("todoApp", ["ngRoute"])
     })
     .controller("TodoListController", function (todoService) {
         var vm = this;
-        vm.todos = todoService.loadTodo();
+        vm.todos = todoService.todoList;
         vm.addTodo = function () {
             vm.todos.push({ text: vm.todoText, done: false });
             vm.todoText = "";
@@ -37,20 +37,17 @@ angular.module("todoApp", ["ngRoute"])
             angular.forEach(oldTodos, function (todo) {
                 if (!todo.done) vm.todos.push(todo);
             });
+            todoService.todoList = vm.todos;
         };
-    }).controller("DetailController", function ($routeParams, todoService) {
+    })
+    .controller("DetailController", function ($routeParams, todoService) {
         var vm = this;
         vm.todo = todoService.todoList[$routeParams.index];
-    }).service("todoService", function () {
+    })
+    .service("todoService", function () {
         var vm = this;
-        vm.saveTodo = function (todo) {
-            vm.todoList = todo;
-        }
-        vm.loadTodo = function (todo) {
-            return vm.todoList;
-        }
         vm.todoList = [
             { text: "learn AngularJS", done: true },
             { text: "build an AngularJS app", done: false }];
 
-    })
+    });

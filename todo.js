@@ -1,28 +1,56 @@
-angular.module('todoApp', [])
-    .controller('TodoListController', function () {
-        var todoList = this;
-        todoList.todos = [
-            { text: 'learn AngularJS', done: true },
-            { text: 'build an AngularJS app', done: false }];
-
-        todoList.addTodo = function () {
-            todoList.todos.push({ text: todoList.todoText, done: false });
-            todoList.todoText = '';
+angular.module("todoApp", ["ngRoute"])
+    .config(function ($routeProvider) {
+        $routeProvider
+            .when("/todo", {
+                templateUrl: "todo.html",
+                controller: "TodoListController",
+                controllerAs: "vm"
+            })
+            .when("/detail/:index", {
+                templateUrl: "detail.html",
+                controller: "DetailController",
+                controllerAs: "vm"
+            })
+            .otherwise({
+                redirectTo: '/todo'
+            })
+    })
+    .controller("TodoListController", function (todoService) {
+        var vm = this;
+        vm.todos = todoService.loadTodo();
+        vm.addTodo = function () {
+            vm.todos.push({ text: vm.todoText, done: false });
+            vm.todoText = "";
         };
 
-        todoList.remaining = function () {
+        vm.remaining = function () {
             var count = 0;
-            angular.forEach(todoList.todos, function (todo) {
+            angular.forEach(vm.todos, function (todo) {
                 count += todo.done ? 0 : 1;
             });
             return count;
         };
 
-        todoList.archive = function () {
-            var oldTodos = todoList.todos;
-            todoList.todos = [];
+        vm.archive = function () {
+            var oldTodos = vm.todos;
+            vm.todos = [];
             angular.forEach(oldTodos, function (todo) {
-                if (!todo.done) todoList.todos.push(todo);
+                if (!todo.done) vm.todos.push(todo);
             });
         };
-    });
+    }).controller("DetailController", function ($routeParams, todoService) {
+        var vm = this;
+        vm.todo = todoService.todoList[$routeParams.index];
+    }).service("todoService", function () {
+        var vm = this;
+        vm.saveTodo = function (todo) {
+            vm.todoList = todo;
+        }
+        vm.loadTodo = function (todo) {
+            return vm.todoList;
+        }
+        vm.todoList = [
+            { text: "learn AngularJS", done: true },
+            { text: "build an AngularJS app", done: false }];
+
+    })
